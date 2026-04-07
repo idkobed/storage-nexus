@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STORAGE NEXUS — Memoria Externa & Almacenamiento</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cyan: #00ffff;
+  --pink: #ff00ff;
+  --green: #00ff88;
+  --orange: #ff6600;
+  --yellow: #ffff00;
+  --bg: #050510;
+  --card: #0a0a1a;
+  --border: rgba(0,255,255,0.15);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--bg);
+  color: #e0e0ff;
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+}
+body::before {
+  content:'';
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background-image:
+    linear-gradient(rgba(0,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,255,0.025) 1px, transparent 1px);
+  background-size:60px 60px;
+  z-index:0;
+  animation: gridMove 25s linear infinite;
+}
+@keyframes gridMove { to { transform:translateY(60px); } }
+body::after {
+  content:'';
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+  pointer-events:none; z-index:9999;
+}
+
+/* SCROLL PROGRESS */
+#progress { position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg,var(--cyan),var(--pink)); z-index:2000; box-shadow:0 0 8px var(--cyan); transition:width .1s; }
+
+/* NAV */
+nav {
+  position:fixed; top:0; width:100%;
+  background:rgba(5,5,16,0.92); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--cyan);
+  z-index:1000; padding:12px 40px;
+  display:flex; align-items:center; justify-content:space-between;
+  box-shadow:0 0 25px rgba(0,255,255,0.15);
+}
+.logo { font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.1rem; color:var(--cyan); text-shadow:0 0 15px var(--cyan); letter-spacing:4px; }
+.nav-links { display:flex; gap:25px; list-style:none; }
+.nav-links a { color:#666; text-decoration:none; font-family:'Share Tech Mono',monospace; font-size:0.72rem; letter-spacing:2px; transition:all .3s; }
+.nav-links a:hover { color:var(--cyan); text-shadow:0 0 8px var(--cyan); }
+
+/* HERO */
+.hero {
+  position:relative; min-height:100vh;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  padding:120px 20px 80px; z-index:1;
+}
+.hero-orb {
+  position:absolute; width:700px; height:700px; border-radius:50%;
+  background:radial-gradient(circle, rgba(0,255,255,0.07) 0%, transparent 70%);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  animation:pulse 5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.08)} }
+.hero-tag { font-family:'Share Tech Mono',monospace; font-size:.7rem; color:var(--pink); letter-spacing:6px; margin-bottom:18px; text-shadow:0 0 8px var(--pink); animation:fadeUp .8s ease both; }
+.hero h1 { font-family:'Orbitron',sans-serif; font-weight:900; font-size:clamp(2.2rem,6vw,5rem); line-height:1.1; margin-bottom:18px; animation:fadeUp 1s .2s ease both; }
+.c1 { display:block; color:var(--cyan); animation:glitch 6s ease-in-out infinite; }
+.c2 { display:block; color:white; }
+@keyframes glitch {
+  0%,100%{text-shadow:0 0 20px var(--cyan),0 0 60px var(--cyan)}
+  15%{text-shadow:-3px 0 var(--pink),3px 0 var(--cyan)}
+  30%{text-shadow:0 0 20px var(--cyan),0 0 60px var(--cyan)}
+  60%{text-shadow:3px 0 var(--pink),-3px 0 var(--cyan)}
+}
+.hero-sub { font-size:1rem; color:rgba(255,255,255,.45); letter-spacing:4px; margin-bottom:50px; animation:fadeUp 1s .4s ease both; }
+.hero-badges { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; animation:fadeUp 1s .6s ease both; }
+.badge { padding:7px 18px; border:1px solid var(--cyan); border-radius:2px; font-family:'Share Tech Mono',monospace; font-size:.7rem; color:var(--cyan); letter-spacing:2px; background:rgba(0,255,255,0.05); cursor:pointer; transition:all .3s; }
+.badge:hover { background:rgba(0,255,255,0.15); box-shadow:0 0 15px rgba(0,255,255,.3); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+/* SECTIONS */
+section { position:relative; z-index:1; padding:80px 40px; max-width:1300px; margin:0 auto; }
+.sec-label { font-family:'Share Tech Mono',monospace; font-size:.68rem; letter-spacing:6px; color:var(--pink); text-shadow:0 0 8px var(--pink); margin-bottom:10px; }
+.sec-title { font-family:'Orbitron',sans-serif; font-size:clamp(1.4rem,3vw,2.2rem); font-weight:700; color:white; margin-bottom:50px; }
+.sec-title span { color:var(--cyan); text-shadow:0 0 12px var(--cyan); }
+.divider { width:100%; height:1px; background:linear-gradient(90deg,transparent,var(--cyan),transparent); position:relative; z-index:1; }
+
+/* CARDS */
+.grid3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:22px; }
+.grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:22px; }
+.card {
+  background:var(--card); border:1px solid var(--border); border-radius:4px;
+  padding:30px 26px; position:relative; overflow:hidden;
+  transition:all .4s ease; cursor:default;
+}
+.card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+.card.hdd::before { background:var(--orange); }
+.card.ssd::before { background:var(--cyan); }
+.card.nvme::before { background:var(--pink); }
+.card:hover { transform:translateY(-7px); }
+.card.hdd:hover { border-color:rgba(255,102,0,.5); box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 30px rgba(255,102,0,.2); }
+.card.ssd:hover { border-color:rgba(0,255,255,.5); box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 30px rgba(0,255,255,.2); }
+.card.nvme:hover { border-color:rgba(255,0,255,.5); box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 30px rgba(255,0,255,.2); }
+.card-icon { font-size:2.2rem; margin-bottom:12px; }
+.card-title { font-family:'Orbitron',sans-serif; font-size:1.3rem; font-weight:700; margin-bottom:4px; }
+.hdd .card-title { color:var(--orange); text-shadow:0 0 10px var(--orange); }
+.ssd .card-title { color:var(--cyan); text-shadow:0 0 10px var(--cyan); }
+.nvme .card-title { color:var(--pink); text-shadow:0 0 10px var(--pink); }
+.card-sub { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:#444; letter-spacing:3px; margin-bottom:22px; }
+.spec-list { list-style:none; }
+.spec-list li { display:flex; gap:10px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,.04); font-size:.88rem; color:rgba(255,255,255,.65); }
+.spec-list li:last-child { border-bottom:none; }
+.ex-box { margin-top:16px; padding:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:3px; }
+.ex-label { font-family:'Share Tech Mono',monospace; font-size:.6rem; color:#444; letter-spacing:3px; margin-bottom:6px; }
+.ex-text { font-size:.82rem; color:rgba(255,255,255,.5); }
+
+/* SPEED BARS */
+.speed-box { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:35px 35px; margin-top:50px; }
+.speed-box-title { font-family:'Orbitron',sans-serif; font-size:.9rem; color:var(--green); letter-spacing:3px; margin-bottom:25px; text-shadow:0 0 10px var(--green); }
+.speed-row { display:grid; grid-template-columns:130px 1fr 150px; align-items:center; gap:18px; margin-bottom:18px; }
+.speed-label { font-family:'Share Tech Mono',monospace; font-size:.75rem; color:#888; text-align:right; }
+.bar-track { height:14px; background:rgba(255,255,255,.04); border-radius:2px; overflow:hidden; border:1px solid rgba(255,255,255,.06); }
+.bar-fill { height:100%; border-radius:2px; width:0; transition:width 1.5s ease; }
+.speed-val { font-family:'Share Tech Mono',monospace; font-size:.72rem; color:rgba(255,255,255,.45); }
+
+/* DIAGRAM */
+.diagram-wrap { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:40px; margin-top:50px; }
+.diagram-title { font-family:'Orbitron',sans-serif; font-size:.9rem; color:var(--pink); letter-spacing:3px; margin-bottom:30px; text-shadow:0 0 10px var(--pink); }
+.diagram-svg { width:100%; max-width:800px; display:block; margin:0 auto; }
+
+/* FS CARDS */
+.fs-card {
+  background:var(--card); border:1px solid rgba(255,255,255,.07); border-radius:4px;
+  padding:24px 20px; transition:all .3s;
+}
+.fs-card:hover { border-color:var(--pink); box-shadow:0 0 20px rgba(255,0,255,.15); transform:translateY(-4px); }
+.fs-name { font-family:'Orbitron',sans-serif; font-size:1.1rem; color:var(--pink); text-shadow:0 0 8px var(--pink); margin-bottom:5px; }
+.fs-os { font-family:'Share Tech Mono',monospace; font-size:.62rem; color:#444; letter-spacing:2px; margin-bottom:12px; }
+.fs-desc { font-size:.86rem; color:rgba(255,255,255,.55); line-height:1.65; }
+
+/* RAID */
+.raid-card {
+  background:var(--card); border:1px solid rgba(0,255,136,.12); border-radius:4px;
+  padding:26px 22px; transition:all .3s;
+}
+.raid-card:hover { border-color:var(--green); box-shadow:0 0 25px rgba(0,255,136,.15); transform:translateY(-5px); }
+.raid-level { font-family:'Orbitron',sans-serif; font-size:1.8rem; font-weight:900; color:var(--green); text-shadow:0 0 15px var(--green); margin-bottom:3px; }
+.raid-name { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:#444; letter-spacing:3px; margin-bottom:15px; }
+.raid-desc { font-size:.86rem; color:rgba(255,255,255,.6); line-height:1.65; margin-bottom:14px; }
+.raid-use { font-size:.82rem; color:rgba(255,255,255,.4); font-style:italic; margin-bottom:14px; }
+.tags { display:flex; gap:7px; flex-wrap:wrap; }
+.tag { padding:3px 9px; border-radius:2px; font-family:'Share Tech Mono',monospace; font-size:.62rem; letter-spacing:1px; }
+.tg { background:rgba(0,255,136,.08); color:var(--green); border:1px solid rgba(0,255,136,.25); }
+.tr { background:rgba(255,50,50,.08); color:#ff5555; border:1px solid rgba(255,50,50,.25); }
+.ty { background:rgba(255,255,0,.08); color:var(--yellow); border:1px solid rgba(255,255,0,.25); }
+
+/* RAID VISUAL */
+.raid-visual { display:flex; gap:8px; margin-bottom:14px; }
+.disk { width:32px; height:42px; border-radius:3px; border:2px solid; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.55rem; font-family:'Share Tech Mono',monospace; color:white; }
+.disk.active { border-color:var(--green); background:rgba(0,255,136,.1); }
+.disk.mirror { border-color:var(--cyan); background:rgba(0,255,255,.1); }
+.disk.parity { border-color:var(--yellow); background:rgba(255,255,0,.08); }
+.disk.stripe { border-color:var(--pink); background:rgba(255,0,255,.08); }
+
+/* TRENDS */
+.trend-card {
+  background:var(--card); border:1px solid rgba(255,255,0,.1); border-radius:4px;
+  padding:28px 24px; transition:all .3s; position:relative; overflow:hidden;
+}
+.trend-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--cyan),var(--pink)); transform:scaleX(0); transition:transform .4s; transform-origin:left; }
+.trend-card:hover::after { transform:scaleX(1); }
+.trend-card:hover { border-color:rgba(255,255,0,.3); box-shadow:0 0 25px rgba(255,255,0,.08); transform:translateY(-5px); }
+.trend-icon { font-size:2.2rem; margin-bottom:13px; }
+.trend-title { font-family:'Orbitron',sans-serif; font-size:.95rem; color:var(--yellow); text-shadow:0 0 8px var(--yellow); margin-bottom:10px; letter-spacing:1px; }
+.trend-desc { font-size:.87rem; color:rgba(255,255,255,.57); line-height:1.7; }
+.trend-year { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:var(--cyan); margin-top:10px; }
+
+/* INTERACTIVE — QUIZ */
+.quiz-wrap { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:40px; }
+.quiz-title { font-family:'Orbitron',sans-serif; font-size:1rem; color:var(--cyan); letter-spacing:3px; margin-bottom:30px; text-shadow:0 0 10px var(--cyan); }
+.question { margin-bottom:30px; }
+.q-text { font-size:1rem; color:white; margin-bottom:14px; font-weight:600; }
+.options { display:flex; flex-direction:column; gap:10px; }
+.opt {
+  padding:12px 18px; border:1px solid rgba(255,255,255,.1); border-radius:3px;
+  background:rgba(255,255,255,.03); cursor:pointer; font-size:.9rem;
+  color:rgba(255,255,255,.7); transition:all .25s; font-family:'Rajdhani',sans-serif;
+  text-align:left;
+}
+.opt:hover { border-color:var(--cyan); color:var(--cyan); background:rgba(0,255,255,.05); }
+.opt.correct { border-color:var(--green); color:var(--green); background:rgba(0,255,136,.1); }
+.opt.wrong { border-color:#ff4444; color:#ff4444; background:rgba(255,50,50,.08); }
+.opt:disabled { cursor:default; }
+.q-feedback { margin-top:10px; font-family:'Share Tech Mono',monospace; font-size:.78rem; min-height:20px; }
+.quiz-score { font-family:'Orbitron',sans-serif; font-size:1.2rem; color:var(--green); text-shadow:0 0 10px var(--green); margin-top:20px; display:none; }
+
+/* INTERACTIVE — COMPARATOR */
+.comparator { background:var(--card); border:1px solid var(--border); border-radius:4px; padding:40px; margin-top:40px; }
+.comp-title { font-family:'Orbitron',sans-serif; font-size:1rem; color:var(--pink); letter-spacing:3px; margin-bottom:25px; text-shadow:0 0 10px var(--pink); }
+.comp-controls { display:flex; gap:15px; flex-wrap:wrap; margin-bottom:30px; align-items:center; }
+.comp-select {
+  padding:10px 18px; background:rgba(0,0,0,.4); border:1px solid rgba(0,255,255,.3);
+  border-radius:3px; color:var(--cyan); font-family:'Share Tech Mono',monospace;
+  font-size:.78rem; cursor:pointer; outline:none; letter-spacing:1px;
+}
+.comp-btn {
+  padding:10px 22px; background:rgba(0,255,255,.08); border:1px solid var(--cyan);
+  border-radius:3px; color:var(--cyan); font-family:'Orbitron',sans-serif;
+  font-size:.72rem; cursor:pointer; letter-spacing:2px; transition:all .3s;
+}
+.comp-btn:hover { background:rgba(0,255,255,.18); box-shadow:0 0 15px rgba(0,255,255,.3); }
+.comp-table { width:100%; border-collapse:collapse; }
+.comp-table th {
+  font-family:'Orbitron',sans-serif; font-size:.75rem; letter-spacing:2px;
+  color:var(--cyan); border-bottom:1px solid rgba(0,255,255,.2);
+  padding:12px 15px; text-align:left;
+}
+.comp-table td { padding:11px 15px; border-bottom:1px solid rgba(255,255,255,.04); font-size:.88rem; color:rgba(255,255,255,.65); font-family:'Rajdhani',sans-serif; }
+.comp-table tr:hover td { background:rgba(255,255,255,.02); }
+.win { color:var(--green); font-weight:700; }
+.mid { color:var(--yellow); }
+.low { color:#ff6666; }
+
+/* IA */
+.ia-wrap {
+  background:linear-gradient(135deg,rgba(0,255,255,.04),rgba(255,0,255,.04));
+  border:1px solid rgba(0,255,255,.18); border-radius:4px; padding:50px 40px; text-align:center;
+  position:relative; overflow:hidden;
+}
+.ia-wrap::before { content:'{ IA }'; position:absolute; top:-15px; right:25px; font-family:'Orbitron',sans-serif; font-size:5rem; font-weight:900; color:rgba(0,255,255,.03); pointer-events:none; }
+.ia-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px; margin-top:35px; text-align:left; }
+.ia-item { background:rgba(0,0,0,.3); border:1px solid rgba(0,255,255,.08); border-radius:4px; padding:18px; }
+.ia-label { font-family:'Share Tech Mono',monospace; font-size:.7rem; color:var(--cyan); letter-spacing:2px; margin-bottom:7px; }
+.ia-desc { font-size:.84rem; color:rgba(255,255,255,.5); line-height:1.6; }
+
+/* REFERENCES */
+.ref-list { list-style:none; }
+.ref-item { padding:14px 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:.88rem; color:rgba(255,255,255,.5); line-height:1.6; }
+.ref-item:last-child { border-bottom:none; }
+.ref-item a { color:var(--cyan); text-decoration:none; }
+.ref-item a:hover { text-shadow:0 0 8px var(--cyan); }
+.ref-tag { font-family:'Share Tech Mono',monospace; font-size:.6rem; color:var(--green); letter-spacing:2px; display:inline-block; margin-right:8px; }
+
+/* FOOTER */
+footer { border-top:1px solid rgba(0,255,255,.1); padding:40px; text-align:center; position:relative; z-index:1; }
+.f-logo { font-family:'Orbitron',sans-serif; font-size:.95rem; color:var(--cyan); text-shadow:0 0 10px var(--cyan); letter-spacing:4px; margin-bottom:8px; }
+.f-sub { font-family:'Share Tech Mono',monospace; font-size:.65rem; color:#2a2a3a; letter-spacing:3px; }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">STORAGE NEXUS</div>
+  <ul class="nav-links">
+    <li><a href="#comparativa">HDD/SSD/NVMe</a></li>
+    <li><a href="#filesystem">Sistemas</a></li>
+    <li><a href="#raid">RAID</a></li>
+    <li><a href="#tendencias">2026</a></li>
+    <li><a href="#interactivo">Quiz</a></li>
+    <li><a href="#ia">IA</a></li>
+    <li><a href="#referencias">Refs</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-orb"></div>
+  <div>
+    <div class="hero-tag">// GRUPO 3 — ARQUITECTURA DE COMPUTADORES //</div>
+    <h1><span class="c1">MEMORIA EXTERNA</span><span class="c2">&amp; ALMACENAMIENTO</span></h1>
+    <p class="hero-sub">EXPLORANDO EL UNIVERSO DEL ALMACENAMIENTO DIGITAL · 2026</p>
+    <div class="hero-badges">
+      <span class="badge">HDD</span><span class="badge">SSD</span><span class="badge">NVMe</span>
+      <span class="badge">RAID</span><span class="badge">CLOUD</span><span class="badge">EDGE</span>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- MÓDULO 1: HDD vs SSD vs NVMe -->
+<section id="comparativa">
+  <div class="sec-label">// MÓDULO 01</div>
+  <h2 class="sec-title">HDD <span>vs</span> SSD <span>vs</span> NVMe</h2>
+
+  <div class="grid3">
+    <div class="card hdd">
+      <div class="card-icon">💿</div>
+      <div class="card-title">HDD</div>
+      <div class="card-sub">HARD DISK DRIVE · 1956</div>
+      <ul class="spec-list">
+        <li>⚙️ Platos magnéticos giratorios + cabezal lector mecánico</li>
+        <li>⚡ 80–160 MB/s lectura secuencial · 5400–7200 RPM</li>
+        <li>📦 Hasta 22 TB (WD Gold 2024) · ~$15–20/TB</li>
+        <li>🔊 Ruido, vibración, susceptible a golpes</li>
+        <li>🌡️ Latencia alta: 5–10 ms promedio</li>
+        <li>✅ Backups, NAS, archivos fríos, servidores de bajo costo</li>
+      </ul>
+      <div class="ex-box">
+        <div class="ex-label">EJEMPLO REAL</div>
+        <div class="ex-text">Seagate IronWolf 20TB — usado en sistemas NAS domésticos y PYMES para almacenamiento masivo a bajo costo.</div>
+      </div>
+    </div>
+
+    <div class="card ssd">
+      <div class="card-icon">🔲</div>
+      <div class="card-title">SSD</div>
+      <div class="card-sub">SOLID STATE DRIVE · 1991</div>
+      <ul class="spec-list">
+        <li>⚡ Chips NAND flash, sin partes móviles — silencioso</li>
+        <li>🚀 500–600 MB/s (SATA) · Latencia &lt;0.1ms</li>
+        <li>📦 250 GB a 8 TB · ~$60–90/TB</li>
+        <li>💪 Resistente a golpes, vibraciones, temperatura</li>
+        <li>🔋 Menor consumo energético que HDD</li>
+        <li>✅ Sistema operativo, apps, laptops, workstations</li>
+      </ul>
+      <div class="ex-box">
+        <div class="ex-label">EJEMPLO REAL</div>
+        <div class="ex-text">Samsung 870 EVO 2TB — el SSD SATA más vendido globalmente, estándar en PCs modernos y laptops de oficina.</div>
+      </div>
+    </div>
+
+    <div class="card nvme">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">NVMe</div>
+      <div class="card-sub">NON-VOLATILE MEMORY EXPRESS · 2011</div>
+      <ul class="spec-list">
+        <li>🔥 Protocolo PCIe directo a CPU · Factor M.2</li>
+        <li>🚀 3,500–14,000 MB/s (Gen4/Gen5) · &lt;0.05ms latencia</li>
+        <li>📦 250 GB a 8 TB · ~$80–120/TB</li>
+        <li>🌡️ Genera calor, necesita disipador térmico</li>
+        <li>🔑 Paralelismo masivo: hasta 65,535 colas</li>
+        <li>✅ Gaming, edición 4K/8K, servidores, IA workloads</li>
+      </ul>
+      <div class="ex-box">
+        <div class="ex-label">EJEMPLO REAL</div>
+        <div class="ex-text">WD Black SN850X 2TB — usado en PS5, RTX 4090 workstations y servidores de renders 3D en tiempo real.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Speed comparison -->
+  <div class="speed-box">
+    <div class="speed-box-title">⚡ COMPARATIVA DE VELOCIDADES DE LECTURA SECUENCIAL</div>
+    <div class="speed-row">
+      <div class="speed-label">HDD 7200 RPM</div>
+      <div class="bar-track"><div class="bar-fill" style="background:linear-gradient(90deg,#ff6600,#ff9900)" data-w="2.2"></div></div>
+      <div class="speed-val">~160 MB/s</div>
+    </div>
+    <div class="speed-row">
+      <div class="speed-label">SSD SATA III</div>
+      <div class="bar-track"><div class="bar-fill" style="background:linear-gradient(90deg,#00cccc,#00ffff)" data-w="8.5"></div></div>
+      <div class="speed-val">~600 MB/s</div>
+    </div>
+    <div class="speed-row">
+      <div class="speed-label">NVMe PCIe Gen3</div>
+      <div class="bar-track"><div class="bar-fill" style="background:linear-gradient(90deg,#cc00cc,#ff00ff)" data-w="24"></div></div>
+      <div class="speed-val">~3,500 MB/s</div>
+    </div>
+    <div class="speed-row">
+      <div class="speed-label">NVMe PCIe Gen4</div>
+      <div class="bar-track"><div class="bar-fill" style="background:linear-gradient(90deg,#ff0088,#ff44ff);box-shadow:0 0 10px #ff00ff" data-w="48"></div></div>
+      <div class="speed-val">~7,000 MB/s</div>
+    </div>
+    <div class="speed-row">
+      <div class="speed-label">NVMe PCIe Gen5</div>
+      <div class="bar-track"><div class="bar-fill" style="background:linear-gradient(90deg,#ffff00,#00ffff);box-shadow:0 0 12px #ffff00" data-w="95"></div></div>
+      <div class="speed-val">~14,000 MB/s</div>
+    </div>
+  </div>
+
+  <!-- Diagram: Estructura HDD -->
+  <div class="diagram-wrap">
+    <div class="diagram-title">📐 DIAGRAMA — ARQUITECTURA INTERNA HDD vs SSD</div>
+    <svg class="diagram-svg" viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono, monospace">
+      <!-- HDD -->
+      <text x="180" y="28" text-anchor="middle" fill="#ff6600" font-size="13" letter-spacing="3">HDD</text>
+      <rect x="30" y="40" width="300" height="230" rx="4" fill="none" stroke="#ff6600" stroke-width="1.5" opacity="0.4"/>
+      <!-- Platos -->
+      <ellipse cx="180" cy="130" rx="90" ry="22" fill="none" stroke="#ff6600" stroke-width="1.5"/>
+      <ellipse cx="180" cy="155" rx="90" ry="22" fill="none" stroke="#ff6600" stroke-width="1" opacity="0.6"/>
+      <ellipse cx="180" cy="180" rx="90" ry="22" fill="none" stroke="#ff6600" stroke-width="1" opacity="0.4"/>
+      <circle cx="180" cy="130" r="12" fill="#ff6600" opacity="0.3"/>
+      <!-- Cabezal -->
+      <line x1="260" y1="100" x2="180" y2="130" stroke="#ffaa00" stroke-width="2"/>
+      <circle cx="260" cy="97" r="5" fill="#ffaa00"/>
+      <text x="268" y="92" fill="#ffaa00" font-size="9" letter-spacing="1">CABEZAL</text>
+      <!-- Labels -->
+      <text x="90" y="128" fill="#ff6600" font-size="8" opacity="0.8">PLATOS MAG.</text>
+      <text x="60" y="255" fill="#ff6600" font-size="9" letter-spacing="1" opacity="0.7">MECÁNICO · LENTO · ECONÓMICO</text>
+
+      <!-- SSD -->
+      <text x="580" y="28" text-anchor="middle" fill="#00ffff" font-size="13" letter-spacing="3">SSD / NVMe</text>
+      <rect x="430" y="40" width="300" height="230" rx="4" fill="none" stroke="#00ffff" stroke-width="1.5" opacity="0.4"/>
+      <!-- Chips NAND -->
+      <rect x="455" y="65" width="55" height="38" rx="3" fill="rgba(0,255,255,0.08)" stroke="#00ffff" stroke-width="1"/>
+      <text x="482" y="88" text-anchor="middle" fill="#00ffff" font-size="8">NAND</text>
+      <rect x="522" y="65" width="55" height="38" rx="3" fill="rgba(0,255,255,0.08)" stroke="#00ffff" stroke-width="1"/>
+      <text x="549" y="88" text-anchor="middle" fill="#00ffff" font-size="8">NAND</text>
+      <rect x="589" y="65" width="55" height="38" rx="3" fill="rgba(0,255,255,0.08)" stroke="#00ffff" stroke-width="1"/>
+      <text x="616" y="88" text-anchor="middle" fill="#00ffff" font-size="8">NAND</text>
+      <rect x="656" y="65" width="55" height="38" rx="3" fill="rgba(0,255,255,0.08)" stroke="#00ffff" stroke-width="1"/>
+      <text x="683" y="88" text-anchor="middle" fill="#00ffff" font-size="8">NAND</text>
+      <!-- Controller -->
+      <rect x="530" y="140" width="100" height="55" rx="4" fill="rgba(255,0,255,0.1)" stroke="#ff00ff" stroke-width="1.5"/>
+      <text x="580" y="165" text-anchor="middle" fill="#ff00ff" font-size="9">CONTROLLER</text>
+      <text x="580" y="180" text-anchor="middle" fill="#ff00ff" font-size="8">SSD/NVMe</text>
+      <!-- DRAM Cache -->
+      <rect x="455" y="140" width="60" height="55" rx="3" fill="rgba(0,255,136,0.08)" stroke="#00ff88" stroke-width="1"/>
+      <text x="485" y="163" text-anchor="middle" fill="#00ff88" font-size="8">DRAM</text>
+      <text x="485" y="177" text-anchor="middle" fill="#00ff88" font-size="8">CACHE</text>
+      <!-- PCIe -->
+      <rect x="480" y="225" width="200" height="25" rx="3" fill="rgba(255,255,0,0.06)" stroke="#ffff00" stroke-width="1"/>
+      <text x="580" y="241" text-anchor="middle" fill="#ffff00" font-size="9" letter-spacing="1">PCIe / SATA INTERFACE</text>
+      <!-- Lines -->
+      <line x1="482" y1="103" x2="482" y2="140" stroke="#00ffff" stroke-width="1" opacity="0.4"/>
+      <line x1="549" y1="103" x2="549" y2="140" stroke="#00ffff" stroke-width="1" opacity="0.4"/>
+      <line x1="580" y1="195" x2="580" y2="225" stroke="#ffff00" stroke-width="1" opacity="0.4"/>
+      <text x="455" y="292" fill="#00ffff" font-size="9" letter-spacing="1" opacity="0.7">ELECTRÓNICO · RÁPIDO · SILENCIOSO</text>
+    </svg>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MÓDULO 2: SISTEMAS DE ARCHIVOS -->
+<section id="filesystem">
+  <div class="sec-label">// MÓDULO 02</div>
+  <h2 class="sec-title">Sistemas de <span>Archivos</span></h2>
+  <div class="grid3">
+    <div class="fs-card">
+      <div class="fs-name">NTFS</div>
+      <div class="fs-os">WINDOWS · 1993</div>
+      <div class="fs-desc">Estándar en Windows NT+. Soporta archivos hasta 16 TB, journaling para recuperación, permisos ACL y cifrado EFS. Máx. volumen: 256 TB. Usado en el 90% de PCs con Windows.</div>
+    </div>
+    <div class="fs-card">
+      <div class="fs-name">FAT32</div>
+      <div class="fs-os">UNIVERSAL · 1996</div>
+      <div class="fs-desc">Límite de 4 GB por archivo y 2 TB por partición. Ideal para pendrives y tarjetas SD por compatibilidad total. Obsoleto para discos de alta capacidad modernos.</div>
+    </div>
+    <div class="fs-card">
+      <div class="fs-name">exFAT</div>
+      <div class="fs-os">MULTIPLATAFORMA · 2006</div>
+      <div class="fs-desc">Sin límite de 4 GB por archivo. Diseñado para flash. Soportado nativamente en Windows, macOS y Linux desde 2019. Estándar para tarjetas SD de 64 GB+.</div>
+    </div>
+    <div class="fs-card">
+      <div class="fs-name">ext4</div>
+      <div class="fs-os">LINUX · 2008</div>
+      <div class="fs-desc">Sistema más usado en Linux. Journaling robusto, volúmenes hasta 1 EB, archivos hasta 16 TB. Extents para archivos grandes, journaling en modo writeback/ordered. Base de Android y la mayoría de servidores Linux.</div>
+    </div>
+    <div class="fs-card">
+      <div class="fs-name">APFS</div>
+      <div class="fs-os">macOS / iOS · 2017</div>
+      <div class="fs-desc">Optimizado para SSD y NVMe. Cifrado nativo AES-256, snapshots instantáneos, clonación copy-on-write. Reemplazó HFS+ en todos los dispositivos Apple desde macOS High Sierra.</div>
+    </div>
+    <div class="fs-card">
+      <div class="fs-name">ZFS / Btrfs</div>
+      <div class="fs-os">SERVIDORES / 2005-2009</div>
+      <div class="fs-desc">ZFS: integridad por checksums, deduplicación, RAID-Z nativo. Btrfs: snapshots, compresión zstd/lzo, subvolúmenes. ZFS es el rey en NAS (TrueNAS), Btrfs el futuro de Linux moderno.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MÓDULO 3: RAID -->
+<section id="raid">
+  <div class="sec-label">// MÓDULO 03</div>
+  <h2 class="sec-title">Niveles de <span>RAID</span></h2>
+  <p style="color:rgba(255,255,255,.45);font-size:.9rem;margin-bottom:35px;letter-spacing:1px;">Redundant Array of Independent Disks — técnica de virtualización que combina múltiples discos en una unidad lógica para mejorar rendimiento, redundancia o ambas.</p>
+  <div class="grid3">
+    <div class="raid-card">
+      <div class="raid-visual">
+        <div class="disk stripe">D1<br>A</div><div class="disk stripe">D2<br>B</div><div class="disk stripe">D3<br>C</div>
+      </div>
+      <div class="raid-level">RAID 0</div>
+      <div class="raid-name">STRIPING · SIN REDUNDANCIA</div>
+      <div class="raid-desc">Divide bloques de datos entre todos los discos en paralelo. Máxima velocidad, sin ninguna protección. Un disco falla = pérdida total.</div>
+      <div class="raid-use">🎯 Uso real: estaciones de edición de video, scratch disks en postproducción.</div>
+      <div class="tags"><span class="tg">Vel. máxima</span><span class="tr">Sin tolerancia</span><span class="ty">100% capacidad</span></div>
+    </div>
+    <div class="raid-card">
+      <div class="raid-visual">
+        <div class="disk active">D1</div><div class="disk mirror">D2<br>↔</div>
+      </div>
+      <div class="raid-level">RAID 1</div>
+      <div class="raid-name">MIRRORING · ESPEJO</div>
+      <div class="raid-desc">Copia exacta de los datos en 2 discos simultáneamente. Si falla uno, el otro toma el relevo sin interrupción del servicio.</div>
+      <div class="raid-use">🎯 Uso real: servidores de bases de datos críticas, sistemas contables.</div>
+      <div class="tags"><span class="tg">Alta redundancia</span><span class="ty">50% capacidad</span><span class="tr">Costo alto/GB</span></div>
+    </div>
+    <div class="raid-card">
+      <div class="raid-visual">
+        <div class="disk stripe">D1</div><div class="disk stripe">D2</div><div class="disk stripe">D3</div><div class="disk parity">P</div>
+      </div>
+      <div class="raid-level">RAID 5</div>
+      <div class="raid-name">STRIPING + PARIDAD DISTRIBUIDA</div>
+      <div class="raid-desc">Datos y paridad distribuidos en mín. 3 discos. Tolera falla de 1 disco. La paridad permite reconstruir los datos perdidos automáticamente.</div>
+      <div class="raid-use">🎯 Uso real: NAS empresariales, servidores de archivos departamentales.</div>
+      <div class="tags"><span class="tg">Balanceado</span><span class="tg">1 falla tolerada</span><span class="ty">(N-1)/N capacidad</span></div>
+    </div>
+    <div class="raid-card">
+      <div class="raid-visual">
+        <div class="disk stripe">D1</div><div class="disk stripe">D2</div><div class="disk parity">P1</div><div class="disk parity">P2</div>
+      </div>
+      <div class="raid-level">RAID 6</div>
+      <div class="raid-name">DOBLE PARIDAD</div>
+      <div class="raid-desc">Como RAID 5 pero con dos bloques de paridad independientes. Tolera falla simultánea de hasta 2 discos. Mínimo 4 discos requeridos.</div>
+      <div class="raid-use">🎯 Uso real: centros de datos, almacenamiento de seguridad médica.</div>
+      <div class="tags"><span class="tg">2 fallas toleradas</span><span class="ty">(N-2)/N capacidad</span></div>
+    </div>
+    <div class="raid-card">
+      <div class="raid-visual">
+        <div class="disk active">D1</div><div class="disk mirror">D2</div><div class="disk active">D3</div><div class="disk mirror">D4</div>
+      </div>
+      <div class="raid-level">RAID 10</div>
+      <div class="raid-name">MIRROR + STRIPE</div>
+      <div class="raid-desc">Combina RAID 1 (espejo) + RAID 0 (stripe). Alta velocidad Y alta redundancia. Mínimo 4 discos. Puede sobrevivir múltiples fallos si no afectan el mismo espejo.</div>
+      <div class="raid-use">🎯 Uso real: bases de datos Oracle, MySQL de alta transaccionalidad.</div>
+      <div class="tags"><span class="tg">Vel + seguridad</span><span class="tr">50% capacidad</span><span class="tr">Más costoso</span></div>
+    </div>
+    <div class="raid-card">
+      <div class="raid-visual">
+        <div class="disk parity">HS</div><div class="disk stripe">D1</div><div class="disk stripe">D2</div><div class="disk parity">P</div>
+      </div>
+      <div class="raid-level">RAID 5+HS</div>
+      <div class="raid-name">HOT SPARE</div>
+      <div class="raid-desc">RAID 5 con disco de repuesto activo (hot spare). Al detectar falla, el sistema reconstruye automáticamente en el disco de reserva sin intervención humana.</div>
+      <div class="raid-use">🎯 Uso real: infraestructura crítica 24/7, hospitales, telecomunicaciones.</div>
+      <div class="tags"><span class="tg">Auto-recuperación</span><span class="tg">Alta disponibilidad</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MÓDULO 4: TENDENCIAS 2026 -->
+<section id="tendencias">
+  <div class="sec-label">// MÓDULO 04</div>
+  <h2 class="sec-title">Tendencias <span>2026</span></h2>
+  <div class="grid3">
+    <div class="trend-card">
+      <div class="trend-icon">☁️</div>
+      <div class="trend-title">CLOUD STORAGE INTELIGENTE</div>
+      <div class="trend-desc">AWS S3, Azure Blob, Google Cloud Storage. Políticas de lifecycle automáticas: datos calientes en SSD, tibios en HDD, fríos en Glacier/Archive. El 94% de empresas Fortune 500 operan multi-cloud en 2026.</div>
+      <div class="trend-year">→ Mercado: $376 billion USD para 2029 (IDC, 2024)</div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">🌐</div>
+      <div class="trend-title">EDGE STORAGE & IoT</div>
+      <div class="trend-desc">Almacenamiento en el borde de la red para dispositivos IoT, vehículos autónomos y ciudades inteligentes. Reduce latencia de 200ms (cloud) a &lt;5ms. Clave para IA en tiempo real sin conectividad constante.</div>
+      <div class="trend-year">→ 55B dispositivos IoT activos para 2026 (Statista)</div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">⚡</div>
+      <div class="trend-title">NVMe PCIe Gen5</div>
+      <div class="trend-desc">Phison E26 y Crucial T705 alcanzan 14,000 MB/s. Samsung 990 Pro Gen5 anunciado. Velocidades que superan a la RAM DDR3. Diseñados para cargas de trabajo de IA, ML y renderizado 8K.</div>
+      <div class="trend-year">→ Gen5 proyecta 67% del mercado enterprise en 2026</div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">🧬</div>
+      <div class="trend-title">DNA DATA STORAGE</div>
+      <div class="trend-desc">Microsoft y Twist Bioscience codifican datos en secuencias de ADN sintético. 1 gramo = 215 petabytes potenciales. Vida útil de miles de años. En fase de prueba en laboratorios, estimado comercial post-2030.</div>
+      <div class="trend-year">→ Nature: primer archivo recuperado con IA en ADN (2023)</div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">🔒</div>
+      <div class="trend-title">STORAGE AS A SERVICE</div>
+      <div class="trend-desc">Modelos totalmente gestionados: Pure Storage Evergreen, Dell APEX, HPE GreenLake. Las empresas pagan por capacidad usada, no por hardware. Eliminan CAPEX y mantenimiento físico. Crecimiento del 28% anual.</div>
+      <div class="trend-year">→ Gartner: 70% de enterprise storage será STaaS para 2028</div>
+    </div>
+    <div class="trend-card">
+      <div class="trend-icon">🤖</div>
+      <div class="trend-title">AI-OPTIMIZED STORAGE</div>
+      <div class="trend-desc">Sistemas de almacenamiento diseñados para LLMs y datasets de IA. NVIDIA GPUDirect Storage elimina la CPU del pipeline de datos GPU↔NVMe. Weka.io y VAST Data lideran el segmento de IA storage.</div>
+      <div class="trend-year">→ ChatGPT-4 requiere ~1.2 PB de almacenamiento de entrenamiento</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MÓDULO 5: INTERACTIVIDAD -->
+<section id="interactivo">
+  <div class="sec-label">// MÓDULO 05 — INTERACTIVO</div>
+  <h2 class="sec-title">Elementos <span>Interactivos</span></h2>
+
+  <!-- QUIZ -->
+  <div class="quiz-wrap">
+    <div class="quiz-title">🎮 QUIZ — PONLE A PRUEBA TUS CONOCIMIENTOS</div>
+    <div id="quiz-container"></div>
+    <div class="quiz-score" id="quiz-score"></div>
+  </div>
+
+  <!-- COMPARADOR -->
+  <div class="comparator">
+    <div class="comp-title">🔍 COMPARADOR INTERACTIVO DE TECNOLOGÍAS</div>
+    <div class="comp-controls">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:.75rem;color:#666;letter-spacing:2px;">COMPARAR:</span>
+      <select class="comp-select" id="devA">
+        <option value="hdd">HDD 7200rpm</option>
+        <option value="ssd">SSD SATA</option>
+        <option value="nvme3">NVMe Gen3</option>
+        <option value="nvme4">NVMe Gen4</option>
+        <option value="nvme5">NVMe Gen5</option>
+      </select>
+      <span style="color:#444;font-family:'Share Tech Mono',monospace;">VS</span>
+      <select class="comp-select" id="devB">
+        <option value="ssd">SSD SATA</option>
+        <option value="hdd">HDD 7200rpm</option>
+        <option value="nvme3">NVMe Gen3</option>
+        <option value="nvme4">NVMe Gen4</option>
+        <option value="nvme5">NVMe Gen5</option>
+      </select>
+      <button class="comp-btn" onclick="compare()">COMPARAR →</button>
+    </div>
+    <div id="comp-result"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- IA -->
+<section id="ia">
+  <div class="ia-wrap">
+    <div class="sec-label">// REQUISITO DEL PROYECTO</div>
+    <h2 class="sec-title">👉 ¿Cómo usamos la <span>IA</span> en este proyecto?</h2>
+    <div class="ia-grid">
+      <div class="ia-item">
+        <div class="ia-label">🤖 CLAUDE (ANTHROPIC)</div>
+        <div class="ia-desc">Generó el contenido técnico completo: explicaciones, ejemplos reales, comparativas, tendencias 2026 y estructura narrativa. Modelo claude-sonnet-4.</div>
+      </div>
+      <div class="ia-item">
+        <div class="ia-label">💻 GENERACIÓN DE CÓDIGO</div>
+        <div class="ia-desc">Este portal web fue desarrollado íntegramente con Claude: HTML, CSS gaming neón, JS interactivo, diagramas SVG, quiz y comparador dinámico.</div>
+      </div>
+      <div class="ia-item">
+        <div class="ia-label">📄 DOCUMENTO PDF</div>
+        <div class="ia-desc">El PDF de soporte fue generado mediante script Python creado por Claude usando ReportLab, con diseño profesional y estructura académica.</div>
+      </div>
+      <div class="ia-item">
+        <div class="ia-label">🔍 VERIFICACIÓN DE DATOS</div>
+        <div class="ia-desc">Usamos la búsqueda web integrada de Claude para verificar velocidades actuales, precios de mercado 2025-2026 y estadísticas del sector de almacenamiento.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- REFERENCIAS -->
+<section id="referencias">
+  <div class="sec-label">// REFERENCIAS ACADÉMICAS</div>
+  <h2 class="sec-title">Referencias <span>Bibliográficas</span></h2>
+  <ul class="ref-list">
+    <li class="ref-item"><span class="ref-tag">[1]</span> Patterson, D. A., Gibson, G., & Katz, R. H. (1988). <em>A Case for Redundant Arrays of Inexpensive Disks (RAID)</em>. ACM SIGMOD Conference. DOI: 10.1145/50202.50214</li>
+    <li class="ref-item"><span class="ref-tag">[2]</span> Tanenbaum, A. S., & Bos, H. (2014). <em>Modern Operating Systems</em> (4th ed., pp. 356–410). Pearson — Capítulo de sistemas de archivos y gestión de almacenamiento.</li>
+    <li class="ref-item"><span class="ref-tag">[3]</span> Intel Corporation. (2020). <em>NVM Express Base Specification 1.4b</em>. NVMe Consortium. Disponible en: <a href="https://nvmexpress.org/developers/nvme-specification/" target="_blank">nvmexpress.org</a></li>
+    <li class="ref-item"><span class="ref-tag">[4]</span> Coughlin, T., & Hoydis, J. (2023). <em>Digital Storage in Consumer Electronics: The Great Paradigm Shift</em>. IEEE Consumer Electronics Magazine, 12(3), 14–22.</li>
+    <li class="ref-item"><span class="ref-tag">[5]</span> Church, G. M., Gao, Y., & Kosuri, S. (2012). <em>Next-Generation Digital Information Storage in DNA</em>. Science, 337(6102), 1628. DOI: 10.1126/science.1226355</li>
+    <li class="ref-item"><span class="ref-tag">[6]</span> IDC Research. (2024). <em>Worldwide Global DataSphere Forecast 2024–2028</em>. International Data Corporation. Doc #US51467323.</li>
+    <li class="ref-item"><span class="ref-tag">[7]</span> Gartner Inc. (2024). <em>Magic Quadrant for Primary Storage</em>. Gartner Research. ID: G00783124.</li>
+    <li class="ref-item"><span class="ref-tag">[8]</span> Silberschatz, A., Galvin, P. B., & Gagne, G. (2018). <em>Operating System Concepts</em> (10th ed., Cap. 14-15). Wiley — File-System Interface & Implementation.</li>
+  </ul>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-logo">STORAGE NEXUS</div>
+  <div class="f-sub">// GRUPO 3 — MEMORIA EXTERNA & ALMACENAMIENTO // ARQUITECTURA DE COMPUTADORES — 2026 //</div>
+</footer>
+
+<script>
+// SCROLL PROGRESS
+window.addEventListener('scroll', () => {
+  const st = document.documentElement.scrollTop;
+  const sh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  document.getElementById('progress').style.width = (st/sh*100) + '%';
+});
+
+// ANIMATE BARS ON SCROLL
+const barObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      e.target.querySelectorAll('.bar-fill').forEach(b => {
+        const w = b.dataset.w;
+        b.style.width = w + '%';
+      });
+    }
+  });
+}, {threshold:0.3});
+document.querySelectorAll('.speed-box').forEach(el => barObs.observe(el));
+
+// QUIZ
+const questions = [
+  {
+    q: "¿Qué tecnología de almacenamiento tiene mayor velocidad de lectura secuencial?",
+    opts: ["HDD 7200 RPM", "SSD SATA III", "NVMe PCIe Gen4", "USB 3.0"],
+    ans: 2,
+    exp: "✅ NVMe Gen4 alcanza ~7,000 MB/s, 44x más rápido que un HDD."
+  },
+  {
+    q: "¿Cuál nivel de RAID ofrece máxima velocidad pero CERO redundancia?",
+    opts: ["RAID 1", "RAID 5", "RAID 0", "RAID 10"],
+    ans: 2,
+    exp: "✅ RAID 0 (striping) divide datos para velocidad máxima, sin protección alguna."
+  },
+  {
+    q: "¿Qué sistema de archivos usa Apple en sus dispositivos modernos con SSD?",
+    opts: ["NTFS", "HFS+", "exFAT", "APFS"],
+    ans: 3,
+    exp: "✅ APFS (Apple File System) reemplazó a HFS+ en 2017, optimizado para flash/SSD."
+  },
+  {
+    q: "¿Qué significa 'Edge Storage'?",
+    opts: ["Almacenamiento en bordes de disco", "Datos en el extremo de la red, cerca del dispositivo", "Backup en la nube", "RAID en el borde del servidor"],
+    ans: 1,
+    exp: "✅ Edge Storage procesa y almacena datos cerca del origen (IoT, sensores), reduciendo latencia."
+  }
+];
+
+let score = 0, answered = 0;
+const qc = document.getElementById('quiz-container');
+
+questions.forEach((q, i) => {
+  const div = document.createElement('div');
+  div.className = 'question';
+  div.innerHTML = `
+    <div class="q-text">${i+1}. ${q.q}</div>
+    <div class="options">
+      ${q.opts.map((o,j) => `<button class="opt" data-q="${i}" data-a="${j}" onclick="answer(this,${i},${j},${q.ans},'${q.exp}')">${o}</button>`).join('')}
+    </div>
+    <div class="q-feedback" id="fb-${i}"></div>
+  `;
+  qc.appendChild(div);
+});
+
+function answer(btn, qi, ai, correct, exp) {
+  const opts = document.querySelectorAll(`[data-q="${qi}"]`);
+  opts.forEach(o => { o.disabled = true; });
+  const fb = document.getElementById('fb-'+qi);
+  if(ai === correct) {
+    btn.classList.add('correct');
+    fb.style.color = '#00ff88';
+    fb.textContent = exp;
+    score++;
+  } else {
+    btn.classList.add('wrong');
+    opts[correct].classList.add('correct');
+    fb.style.color = '#ff4444';
+    fb.textContent = '❌ Incorrecto. ' + exp;
+  }
+  answered++;
+  if(answered === questions.length) {
+    const sc = document.getElementById('quiz-score');
+    sc.style.display = 'block';
+    sc.textContent = `RESULTADO: ${score}/${questions.length} — ${score===questions.length?'¡PERFECTO! 🔥':score>=2?'¡Bien! 💪':'Sigue estudiando 📚'}`;
+  }
+}
+
+// COMPARADOR
+const devices = {
+  hdd:   { name:'HDD 7200rpm',  read:'160 MB/s',   write:'150 MB/s',  latency:'5–10 ms',    capacity:'Hasta 22 TB',  price:'~$15/TB',   noise:'Alto',    power:'6–8W',   life:'3–5 años' },
+  ssd:   { name:'SSD SATA III', read:'560 MB/s',   write:'530 MB/s',  latency:'~0.1 ms',    capacity:'Hasta 8 TB',   price:'~$70/TB',   noise:'Ninguno', power:'2–3W',   life:'5–10 años' },
+  nvme3: { name:'NVMe PCIe Gen3',read:'3,500 MB/s', write:'3,000 MB/s',latency:'~0.05 ms',   capacity:'Hasta 4 TB',   price:'~$80/TB',   noise:'Ninguno', power:'4–6W',   life:'5–7 años' },
+  nvme4: { name:'NVMe PCIe Gen4',read:'7,000 MB/s', write:'6,500 MB/s',latency:'~0.03 ms',   capacity:'Hasta 8 TB',   price:'~$100/TB',  noise:'Ninguno', power:'5–8W',   life:'5–7 años' },
+  nvme5: { name:'NVMe PCIe Gen5',read:'14,000 MB/s',write:'12,000 MB/s',latency:'~0.02 ms',  capacity:'Hasta 4 TB',   price:'~$150/TB',  noise:'Ninguno', power:'8–12W',  life:'5–7 años' },
+};
+const labels = { read:'Lectura seq.', write:'Escritura seq.', latency:'Latencia', capacity:'Capacidad máx.', price:'Precio aprox.', noise:'Ruido', power:'Consumo', life:'Vida útil' };
+
+function compare() {
+  const a = devices[document.getElementById('devA').value];
+  const b = devices[document.getElementById('devB').value];
+  let html = `<table class="comp-table"><thead><tr><th>CARACTERÍSTICA</th><th>${a.name}</th><th>${b.name}</th></tr></thead><tbody>`;
+  Object.keys(labels).forEach(k => {
+    html += `<tr><td style="color:#555;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:1px;">${labels[k]}</td><td>${a[k]}</td><td>${b[k]}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('comp-result').innerHTML = html;
+}
+compare();
+</script>
+</body>
+</html>
